@@ -1,0 +1,14 @@
+{
+  "name": "cloudencrypt",
+  "version": "1.0.0",
+  "description": "A Project for Application Encryption ",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Group 06",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^29.0.1"
+  }
+}
