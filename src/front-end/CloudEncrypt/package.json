@@ -4,7 +4,8 @@
   "description": "A Project for Application Encryption ",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev:watch": "npx electronmon --trace-warnings ."
   },
   "author": "Group 06",
   "license": "MIT",
