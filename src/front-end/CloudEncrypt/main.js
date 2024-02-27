@@ -20,15 +20,14 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'), 
     }, 
   });
-  
-  win.loadURL(url.format({
+
+  const startURL = url.format({
     pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
+    protocol: 'file'
+  });
 
+  win.loadURL(startURL);
 }
-
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
