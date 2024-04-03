@@ -1,22 +1,38 @@
 'use client';
 
-import { Trash2, Trash, SearchIcon, PlusIcon, EyeIcon, Download } from "lucide-react";
+import { Trash2, Trash, SearchIcon, PlusIcon, EyeIcon, Download, Cloud } from "lucide-react";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Input, Button, Pagination, useDisclosure } from "@nextui-org/react";
-import { cloudFiles, columns, statusOptions } from "@/components/sampledata/sampledata";
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Input, Button, Pagination, useDisclosure, ChipProps, Chip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import { useFiles } from "@/components/provider/FileProvider";
+import { generateKey, generatePrime } from "crypto";
+import { v4 as uuidv4 } from 'uuid';
+import clsx from "clsx";
 
 
-type FileType = typeof cloudFiles[0];
+interface CloudFile {
+    name: string;
+    isEncrypted: boolean;
+    bytes: number;
+    url: string;
+}
 
-const CloudFilesList = () => {
+interface ICloudFilesListProps {
+    loadCloudFiles: () => void;
+}
+
+
+const CloudFilesList = (
+    { loadCloudFiles }: ICloudFilesListProps
+) => {
+    const { cloudFiles, setCloudFiles } = useFiles();
     const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState(new Set<string>([]));
     const [rowsPerPage, setRowsPerPage] = useState(8);
     const [page, setPage] = useState(1);
     const router = useRouter();
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
 
     const hasSearchFilter = Boolean(filterValue);
@@ -67,6 +83,24 @@ const CloudFilesList = () => {
         }
     }, [page]);
 
+    const columns = [
+        {
+            key: "fileName",
+            title: "File Name"
+        },
+        {
+            key: "size",
+            title: "Size"
+        },
+        {
+            key: "status",
+            title: "Encrypted Status"
+        },
+        {
+            key: "actions",
+            title: "Actions"
+        }
+    ];
 
 
     const topContent = useMemo(() => {
@@ -103,11 +137,11 @@ const CloudFilesList = () => {
                         </Button>
                         <Button
                             color="primary"
-                            startContent={<PlusIcon className="w-4 h-4" />}
+                            startContent={<Cloud className="w-4 h-4" />}
                             size="sm"
-                            onClick={() => { router.push('/upload') }}
+                            onClick={loadCloudFiles}
                         >
-                            Add New
+                            Sync
                         </Button>
                     </div>
                 </div>
@@ -121,9 +155,8 @@ const CloudFilesList = () => {
     ]);
 
 
-    const renderCell = useCallback((file: FileType, columnKey: React.Key) => {
-        const cellValue = file[columnKey as keyof FileType];
-
+    const renderCell = useCallback((file: CloudFile, columnKey: React.Key) => {
+        const cellValue = file[columnKey as keyof CloudFile];
 
         if (typeof cellValue === 'function') {
             return <div>Function</div>;
@@ -135,9 +168,18 @@ const CloudFilesList = () => {
                     <div>{file.name}</div>
                 );
 
+            case "status":
+                return (
+                    <Chip className="capitalize" color={file.isEncrypted ? "success" : "danger"}>{file.isEncrypted ? (
+                        <span>Encrypted</span>
+                    ): (
+                        <span>Decrypted</span>
+                    )}</Chip>
+                );
+
             case "size":
                 return (
-                    <div>{(file.size * 1024).toFixed(2)} KB</div>
+                    <div>{(file.bytes / (1024 * 1024)).toFixed(2)} MB</div>
                 );
 
             case "actions":
@@ -149,7 +191,6 @@ const CloudFilesList = () => {
                         <span className="text-lg text-danger cursor-pointer active:opacity-50">
                             <Trash2 />
                         </span>
-
                     </div>
                 );
 
@@ -186,11 +227,17 @@ const CloudFilesList = () => {
     }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
 
+    const generateUUID = () => {
+        return uuidv4();
+    }
 
     return (
         <Table
             aria-label="Cloud files List"
             selectionMode="multiple"
+            classNames={{
+                base: "overflow-auto",
+            }}
             topContent={topContent}
             selectedKeys={selectedKeys}
             onSelectionChange={setSelectedKeys as any}
@@ -201,13 +248,13 @@ const CloudFilesList = () => {
                     <TableColumn
                         key={column.key}
                     >
-                        {column.name}
+                        {column.title}
                     </TableColumn>
                 )}
             </TableHeader>
             <TableBody items={items}>
                 {(item) => (
-                    <TableRow key={item.name}>
+                    <TableRow key={generateUUID()}>
                         {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
                     </TableRow>
                 )}

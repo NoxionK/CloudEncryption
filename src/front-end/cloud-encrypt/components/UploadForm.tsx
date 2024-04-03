@@ -19,6 +19,7 @@ const UploadForm = () => {
 
     useEffect(() => {
         setAlreadyHasFiles(files.length > 0);
+        console.log("[[UploadForm.tsx] Files: ", files);
     }, [files]);
 
     useEffect(() => {
@@ -103,7 +104,6 @@ const UploadForm = () => {
             </div>
         </div>
     )
-
 }
 
 export default UploadForm;

@@ -33,7 +33,6 @@ export default function RootLayout({
           </NextUIProvider>
         </body>
       </FilesProvider>
-
     </html>
   );
 }
