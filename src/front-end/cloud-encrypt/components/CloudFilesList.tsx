@@ -7,12 +7,8 @@ import { useRouter } from "next/navigation";
 import { useFiles } from "@/components/provider/FileProvider";
 import { generateKey, generatePrime } from "crypto";
 import { v4 as uuidv4 } from 'uuid';
-import clsx from "clsx";
 import { downloadFile } from "@/utils/cloudinary";
 import toast from "react-hot-toast";
-// const { dialog } = require('electron');
-
-
 
 interface CloudFile {
     name: string;
@@ -189,7 +185,7 @@ const CloudFilesList = (
             case "actions":
                 return (
                     <div className="relative flex gap-2">
-                        <span className="text-lg cursor-pointer active:opacity-50" onClick={() => { handleDownloadFile(file.url) }}>
+                        <span className="text-lg cursor-pointer active:opacity-50" onClick={() => { handleDownloadFile(file.url, file.name) }}>
                             <Download />
                         </span>
                         <span className="text-lg text-danger cursor-pointer active:opacity-50">
@@ -235,14 +231,12 @@ const CloudFilesList = (
         return uuidv4();
     }
 
-    const handleDownloadFile = async (fileURL: string) => {
-        // const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
-        // if (!result.canceled) {
-        //     const folderPath = result.filePaths[0];
-        //     toast.success(`Downloading file to ${folderPath}`);
-        //     // Use the folderPath...
-        // }
-        await downloadFile(fileURL, "");
+    const handleDownloadFile = async (fileURL: string, fileName: string) => {
+        await downloadFile(fileURL, "../downloads/" + fileName).then(() => {
+            toast.success("File downloaded successfully");
+        }).catch((error) => {
+            toast.error("Failed to download file");
+        });
     }
 
     return (
