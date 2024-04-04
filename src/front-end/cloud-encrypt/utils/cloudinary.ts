@@ -2,12 +2,21 @@
 import { v2 as cloudinary } from 'cloudinary';
 import 'dotenv/config';
 import { Readable } from 'stream';
+import axios from 'axios';
+import fs from 'fs';
 
 // interface EncryptedFile {
 //   name: string;
 //   type: string;
 //   encryptedData: Buffer;
 // };
+
+interface FileInfo {
+  path: string;
+  name: string;
+  size: number;
+  isEncrypted: boolean;
+}
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -36,9 +45,48 @@ export async function uploadFile(encryptedData: string, fileName: string): Promi
   });
 }
 
+export async function downloadFile(url: string, path: string) {
+  const response = await axios({
+    url,
+    method: 'GET',
+    responseType: 'stream',
+  });
+
+  const writer = fs.createWriteStream(path);
+  response.data.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+  }).then(() => {
+    const stats = fs.statSync(path);
+    const fileInfo: FileInfo = {
+      path: path,
+      name: path.split('/').pop() as string,
+      size: stats.size,
+      isEncrypted: false
+    };
+
+    fs.writeFileSync('localFileInfo.json', JSON.stringify(fileInfo))
+  });
+
+
+  // const buffer = Buffer.from(response.data, 'binary');
+  // const originalBuffer = Buffer.from(buffer.toString(), 'base64');
+
+  // fs.writeFileSync(path, buffer);
+
+  // return new Promise<void>((resolve, reject) => {
+  //   fs.writeFile(path, originalBuffer, err => {
+  //     if (err) reject(err)
+  //     else resolve();
+  //   });
+  // });
+}
+
 export async function queryAllFiles() {
   try {
-    let result = await cloudinary.api.resources({ resource_type: 'raw' });
+    let result = await cloudinary.api.resources({ resource_type: 'raw', max_results: 500 });
     let files = result;
     return files;
   } catch (err) {

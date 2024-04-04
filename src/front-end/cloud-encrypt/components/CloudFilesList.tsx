@@ -8,6 +8,10 @@ import { useFiles } from "@/components/provider/FileProvider";
 import { generateKey, generatePrime } from "crypto";
 import { v4 as uuidv4 } from 'uuid';
 import clsx from "clsx";
+import { downloadFile } from "@/utils/cloudinary";
+import toast from "react-hot-toast";
+// const { dialog } = require('electron');
+
 
 
 interface CloudFile {
@@ -172,7 +176,7 @@ const CloudFilesList = (
                 return (
                     <Chip className="capitalize" color={file.isEncrypted ? "success" : "danger"}>{file.isEncrypted ? (
                         <span>Encrypted</span>
-                    ): (
+                    ) : (
                         <span>Decrypted</span>
                     )}</Chip>
                 );
@@ -185,7 +189,7 @@ const CloudFilesList = (
             case "actions":
                 return (
                     <div className="relative flex gap-2">
-                        <span className="text-lg cursor-pointer active:opacity-50">
+                        <span className="text-lg cursor-pointer active:opacity-50" onClick={() => { handleDownloadFile(file.url) }}>
                             <Download />
                         </span>
                         <span className="text-lg text-danger cursor-pointer active:opacity-50">
@@ -229,6 +233,16 @@ const CloudFilesList = (
 
     const generateUUID = () => {
         return uuidv4();
+    }
+
+    const handleDownloadFile = async (fileURL: string) => {
+        // const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
+        // if (!result.canceled) {
+        //     const folderPath = result.filePaths[0];
+        //     toast.success(`Downloading file to ${folderPath}`);
+        //     // Use the folderPath...
+        // }
+        await downloadFile(fileURL, "");
     }
 
     return (
