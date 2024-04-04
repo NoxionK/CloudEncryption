@@ -18,7 +18,7 @@ export const decryptFile = async (path: string, password: string) => {
             const encryptedData = fs.readFileSync(filePath);
             const originalData = Buffer.from(encryptedData.toString(), 'base64');
             const decryptedData = decrypt(originalData, password);
-            fs.writeFileSync(path, decryptedData);
+            fs.writeFileSync(path, decryptedData, 'binary');
             resolve('File decrypted successfully');
         } catch (error) {
             console.error('Failed to decrypt file:', error);

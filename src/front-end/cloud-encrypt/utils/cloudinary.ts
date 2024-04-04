@@ -67,7 +67,7 @@ export async function downloadFile(url: string, path: string) {
       isEncrypted: false
     };
 
-    fs.writeFileSync('localFileInfo.json', JSON.stringify(fileInfo))
+    // fs.writeFileSync('localFileInfo.json', JSON.stringify(fileInfo))
   });
 
 

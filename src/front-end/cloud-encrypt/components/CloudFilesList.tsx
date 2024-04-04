@@ -105,10 +105,10 @@ const CloudFilesList = (
             key: "size",
             title: "Size"
         },
-        {
-            key: "status",
-            title: "Encrypted Status"
-        },
+        // {
+        //     key: "status",
+        //     title: "Encrypted Status"
+        // },
         {
             key: "actions",
             title: "Actions"
@@ -204,7 +204,7 @@ const CloudFilesList = (
 
             case "size":
                 return (
-                    <div>{(file.bytes / (1024 * 1024)).toFixed(2)} MB</div>
+                    <div>{(file.bytes / (1024)).toFixed(2)} KB</div>
                 );
 
             case "actions":

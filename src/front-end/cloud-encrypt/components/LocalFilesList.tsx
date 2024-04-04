@@ -114,18 +114,19 @@ const LocalFilesList = () => {
             key: "fileName",
             title: "File Name"
         },
-        {
-            key: "size",
-            title: "Size"
-        },
+       
         // {
         //     key: "dateModified",
         //     title: "Date Modified"
         // },
         {
-            key: "status",
-            title: "Status"
+            key: "size",
+            title: "Size"
         },
+        // {
+        //     key: "status",
+        //     title: "Status"
+        // },
         {
             key: "actions",
             title: "Actions"
