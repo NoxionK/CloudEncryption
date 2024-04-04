@@ -10,7 +10,6 @@ interface FilesListProps {
     open: () => void;
 }
 
-
 const FilesList = ({
     open
 }: FilesListProps) => {
@@ -18,7 +17,7 @@ const FilesList = ({
     const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState(new Set<string>([]));
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
 
     // useEffect(() => {
@@ -157,6 +156,7 @@ const FilesList = ({
                 return cellValue;
         }
     }, []);
+    
 
     const bottomContent = useMemo(() => {
         return (

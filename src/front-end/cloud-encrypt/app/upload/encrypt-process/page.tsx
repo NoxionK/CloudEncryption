@@ -106,8 +106,8 @@ const EncryptProcessPage = () => {
                     <div className="flex justify-center space-x-4 w-full">
                         <Button color="danger" variant="ghost" className='font-medium' onClick={handleBackToUploadPage}>Reset</Button>
                         <Button color="primary" className='font-medium' onClick={upLoadToCloudinary}>Upload to Cloudinary </Button>
-                        {/* <Button color="primary" className='font-medium' onClick={query}>Query </Button>
-                        <Button color="primary" className='font-medium' onClick={query}>Save Files</Button> */}
+                        <Button color="primary" className='font-medium' onClick={query}>Query </Button>
+                        {/* <Button color="primary" className='font-medium' onClick={query}>Save Files</Button> */}
 
                     </div>
                    

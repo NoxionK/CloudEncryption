@@ -8,9 +8,7 @@ import { useRouter } from "next/navigation";
 import ModalAskPassword from "@/components/modals/modal-ask-password";
 import { getLocalFiles,decryptFile } from "@/utils/localFileHandler";
 import { useFiles } from "@/components/provider/FileProvider";
-import { set } from "react-hook-form";
-import toast from "react-hot-toast";
-import path from "path";
+
 
 interface LocalFile {
     name: string;

@@ -30,7 +30,7 @@ export async function uploadFile(encryptedData: string, fileName: string): Promi
     readableStream.push(encryptedData);
     readableStream.push(null); // indicates end of data
     const uploadStream = cloudinary.uploader.upload_stream(
-      { public_id: fileName, resource_type: 'auto' },
+      { public_id: fileName, resource_type: 'raw' },
       (error, result: any) => {
         if (error) {
           console.error('Error uploading file:', error);
@@ -88,9 +88,40 @@ export async function queryAllFiles() {
   try {
     let result = await cloudinary.api.resources({ resource_type: 'raw', max_results: 500 });
     let files = result;
+    // console.log('Files:', files);
     return files;
   } catch (err) {
     console.error(err);
     return [];
   }
+}
+
+export async function deleteCloudFile(publicId: string) {
+  return new Promise<void>((resolve, reject) => {
+    console.log('Deleting file:', publicId);
+    cloudinary.uploader.destroy(publicId, {resource_type: 'raw'}, (error, result) => {
+      if (error) {
+        console.error('Error deleting file:', error);
+        reject(error);
+      } else {
+        console.log('File deleted successfully:', result);
+        resolve();
+      }
+    });
+  });
+}
+
+export async function deleteCloudFiles(publicIds: string[]) {
+  return new Promise<void>((resolve, reject) => {
+    console.log('Deleting file:', publicIds);
+    cloudinary.api.delete_resources(publicIds, {resource_type: 'raw'}, (error, result) => {
+      if (error) {
+        //console.error('Error deleting file:', error);
+        reject(error);
+      } else {
+        //console.log('File deleted successfully:', result);
+        resolve();
+      }
+    });
+  });
 }

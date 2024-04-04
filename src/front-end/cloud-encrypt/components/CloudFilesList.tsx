@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useFiles } from "@/components/provider/FileProvider";
 import { generateKey, generatePrime } from "crypto";
 import { v4 as uuidv4 } from 'uuid';
-import { downloadFile } from "@/utils/cloudinary";
+import { deleteCloudFile, downloadFile, deleteCloudFiles } from "@/utils/cloudinary";
 import toast from "react-hot-toast";
 
 interface CloudFile {
@@ -29,10 +29,23 @@ const CloudFilesList = (
     const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState(new Set<string>([]));
+    const [selectedPublicIds, setSelectedPublicIds] = useState<string[]>([]);
     const [rowsPerPage, setRowsPerPage] = useState(8);
     const [page, setPage] = useState(1);
     const router = useRouter();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+    useEffect(() => {
+        setSelectedPublicIds(Array.from(selectedKeys));
+    }, [selectedKeys]);
+
+    useEffect(() => {
+        console.log("Selected PublicIDs: ", selectedPublicIds);
+    }, [selectedPublicIds]);
+
+    // useEffect(() => {
+    //     console.log("Selected Keys Values: ", selectedKeys.values());
+    // }, [selectedKeys]);
 
 
     const hasSearchFilter = Boolean(filterValue);
@@ -102,6 +115,15 @@ const CloudFilesList = (
         }
     ];
 
+    const removeSelectedFiles = async () => {
+        await deleteCloudFiles(selectedPublicIds).then(() => {
+            loadCloudFiles();
+            setSelectedKeys(new Set<string>([]));
+            toast.success("Files removed successfully");
+        }).catch((error) => {
+            toast.error("Failed to remove files");
+        });
+    }
 
     const topContent = useMemo(() => {
         return (
@@ -121,17 +143,18 @@ const CloudFilesList = (
                         onValueChange={onSearchChange}
                     />
                     <div className="flex gap-3">
-                        <Button
+                        {/* <Button
                             variant="flat"
                             startContent={<Download className="w-4 h-4" />}
                             size="sm"
                         >
                             Download
-                        </Button>
+                        </Button> */}
                         <Button
                             variant="flat"
                             startContent={<Trash className="w-4 h-4" />}
                             size="sm"
+                            onClick={removeSelectedFiles}
                         >
                             Remove
                         </Button>
@@ -153,6 +176,8 @@ const CloudFilesList = (
         cloudFiles.length,
         hasSearchFilter,
     ]);
+
+
 
 
     const renderCell = useCallback((file: CloudFile, columnKey: React.Key) => {
@@ -188,7 +213,7 @@ const CloudFilesList = (
                         <span className="text-lg cursor-pointer active:opacity-50" onClick={() => { handleDownloadFile(file.url, file.name) }}>
                             <Download />
                         </span>
-                        <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                        <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => { handleRemoveCloudFile(file.name) }}>
                             <Trash2 />
                         </span>
                     </div>
@@ -239,6 +264,19 @@ const CloudFilesList = (
         });
     }
 
+
+    const handleRemoveCloudFile = async (fileName: string) => {
+        console.log("Remove File: ", fileName);
+        await deleteCloudFile(fileName).then(() => {
+            loadCloudFiles();
+            toast.success("File removed successfully");
+        }).catch((error) => {
+            toast.error("Failed to remove file");
+        });
+    }
+
+
+
     return (
         <Table
             aria-label="Cloud files List"
@@ -262,7 +300,7 @@ const CloudFilesList = (
             </TableHeader>
             <TableBody items={items}>
                 {(item) => (
-                    <TableRow key={generateUUID()}>
+                    <TableRow key={item.name}>
                         {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
                     </TableRow>
                 )}
