@@ -9,13 +9,13 @@ export function encrypt(buffer: Buffer, password: string): Buffer {
     return Buffer.concat([iv, encrypted]);
 }
 
-export function decrypt(buffer: Buffer, password: string): string {
+export function decrypt(buffer: Buffer, password: string): Buffer {
     const iv = buffer.slice(0, 16);
     console.log("IV Decrypted: ", iv);
     const encrypted = buffer.slice(16);
     const key = createHash('sha256').update(password).digest();
     const decipher = createDecipheriv('aes-256-cbc', key, iv);
     const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-    return decrypted.toString('utf8');
+    return decrypted;
 }
 

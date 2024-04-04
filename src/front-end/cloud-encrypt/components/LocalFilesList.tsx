@@ -194,7 +194,7 @@ const LocalFilesList = () => {
 
             case "size":
                 return (
-                    <div>{(file.bytes / (1024 * 1024)).toFixed(2)} MB</div>
+                    <div>{(file.bytes / 1024).toFixed(2)} KB</div>
                 );
 
             case "dateModified":

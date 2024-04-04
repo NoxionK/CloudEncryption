@@ -18,7 +18,7 @@ export const decryptFile = async (path: string, password: string) => {
             const encryptedData = fs.readFileSync(filePath);
             const originalData = Buffer.from(encryptedData.toString(), 'base64');
             const decryptedData = decrypt(originalData, password);
-            fs.writeFileSync(path, decryptedData, 'binary');
+            fs.writeFileSync(path, decryptedData);
             resolve('File decrypted successfully');
         } catch (error) {
             console.error('Failed to decrypt file:', error);
@@ -43,7 +43,6 @@ export async function getLocalFiles() {
             updatedAt: stats.mtime,
         };
     });
-
     return filesMetadata;
 }
 
