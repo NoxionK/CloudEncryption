@@ -15,6 +15,13 @@ interface CloudFile {
     url: string;
 }
 
+interface LocalFile {
+    name: string;
+    bytes: number;
+    dateModified: string;
+    isEncrypted: boolean;
+}
+
 interface IContext {
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
@@ -22,6 +29,8 @@ interface IContext {
     setEncryptedFiles: React.Dispatch<React.SetStateAction<EncryptedFile[]>>;
     cloudFiles: CloudFile[];
     setCloudFiles: React.Dispatch<React.SetStateAction<CloudFile[]>>;
+    localFiles: LocalFile[];
+    setLocalFiles: React.Dispatch<React.SetStateAction<LocalFile[]>>;
 }
 
 
@@ -33,6 +42,7 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     const [files, setFiles] = useState<File[]>([]);
     const [encryptedFiles, setEncryptedFiles] = useState<EncryptedFile[]>([]);
     const [cloudFiles, setCloudFiles] = useState<CloudFile[]>([]);
+    const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
 
     // useEffect(() => {   
     //     console.log('Files Change:', files);
@@ -40,7 +50,7 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     // , [files]);
 
     return (
-        <FilesContext.Provider value={{ files, setFiles, encryptedFiles, setEncryptedFiles, cloudFiles, setCloudFiles}}>
+        <FilesContext.Provider value={{ files, setFiles, encryptedFiles, setEncryptedFiles, cloudFiles, setCloudFiles, localFiles, setLocalFiles}}>
             {children}
         </FilesContext.Provider>
     );

@@ -10,7 +10,7 @@ const Navbar = () => {
     const router = useRouter();
 
     return ( 
-        <div className="flex flex-col h-full w-64 bg-blue-950 rounded-r-3xl py-2">
+        <div className="flex flex-col h-full w-64 bg-blue-950 py-2">
             <div 
                 className="m-3 px-3 py-7 border-white border-2 rounded-2xl hover:cursor-pointer"
                 onClick={() => router.push('/')}

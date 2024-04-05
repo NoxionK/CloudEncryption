@@ -2,7 +2,7 @@
 
 import { Trash2, Trash, SearchIcon, PlusIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Input, Button, useDisclosure } from "@nextui-org/react";
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Input, Button, useDisclosure, Chip } from "@nextui-org/react";
 import { useFiles } from "@/components/provider/FileProvider";
 
 interface EncryptedFile {
@@ -42,6 +42,10 @@ const EncryptedFilesList = () => {
         {
             key: "fileName",
             title: "File Name"
+        },
+        {
+            key: "type",
+            title: "Type"
         },
         // {
         //     key: "size",
@@ -140,6 +144,11 @@ const EncryptedFilesList = () => {
             //     return (
             //         <div>{(file.size / 1024).toFixed(2)} KB</div>
             //     );
+
+            case "type":
+                return (
+                    <Chip>{file.type}</Chip>
+                );
 
             case "actions":
                 return (

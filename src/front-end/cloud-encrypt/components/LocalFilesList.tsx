@@ -1,28 +1,61 @@
 'use client';
 
-import { Trash2, Trash, SearchIcon, PlusIcon, EyeIcon, Download, Eye } from "lucide-react";
+import { Trash2, Trash, SearchIcon, PlusIcon, EyeIcon, Download, Eye, KeyRound, Key  } from "lucide-react";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Input, Button, Pagination, useDisclosure } from "@nextui-org/react";
-import { cloudFiles, columns, statusOptions } from "@/components/sampledata/sampledata";
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Input, Button, Pagination, useDisclosure, Chip } from "@nextui-org/react";
+// import { localFiles, columns, statusOptions } from "@/components/sampledata/sampledata";
 import { useRouter } from "next/navigation";
 import ModalAskPassword from "@/components/modals/modal-ask-password";
+import { getLocalFiles,decryptFile } from "@/utils/localFileHandler";
+import { useFiles } from "@/components/provider/FileProvider";
 
-type FileType = typeof cloudFiles[0];
+
+interface LocalFile {
+    name: string;
+    bytes: number;
+    dateModified: string;
+    isEncrypted: boolean;
+}
 
 const LocalFilesList = () => {
+    const { localFiles, setLocalFiles } = useFiles();
     const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState(new Set<string>([]));
     const [rowsPerPage, setRowsPerPage] = useState(8);
     const [page, setPage] = useState(1);
     const router = useRouter();
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [password, setPassword] = useState<string>("");
+    const [selectedFilePath, setSelectedFilePath] = useState<string>("");
 
+    // useEffect(() => {
+    //     console.log("Local Files: ", localFiles);
+    // }, [localFiles]);
+
+    useEffect(() => {
+        console.log("[LocalFileList.tsx] Password:", password);
+    }, [password]);
+
+    useEffect(() => {
+        console.log("[LocalFileList.tsx] Selected File Path:", selectedFilePath);
+    }, [selectedFilePath]);
+
+
+    const loadLocalFiles = async () => {
+        const files = await getLocalFiles();
+        setLocalFiles(files.map(file => ({
+            name: file.name,
+            bytes: file.size,
+            dateModified: file.updatedAt.toString(),
+            isEncrypted: true
+        })));
+    }
 
     const hasSearchFilter = Boolean(filterValue);
 
     const filteredItems = useMemo(() => {
-        let filteredFiles = [...cloudFiles];
+        let filteredFiles = [...localFiles];
 
         if (hasSearchFilter) {
             filteredFiles = filteredFiles.filter((file) =>
@@ -31,11 +64,8 @@ const LocalFilesList = () => {
         }
 
         return filteredFiles;
-    }, [cloudFiles, filterValue]);
+    }, [localFiles, filterValue]);
 
-    // useEffect(() => {
-    //     console.log("Filter Items: ", filteredItems);
-    // }, [filteredItems]);
 
     const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -67,11 +97,41 @@ const LocalFilesList = () => {
         }
     }, [page]);
 
-    const showFileContent = () => {
-        onOpen();
+    const showFileContent = async (name:string) => {
+        // await openFile(name);
+        // onOpen();
         //console.log("Show File Content");
+        window.electron.openFile(name)
     }
 
+    const handleDecrypt = (fileName: string) => {
+        setSelectedFilePath("../downloads/" + fileName);
+        onOpen();
+    }
+
+    const columns = [
+        {
+            key: "fileName",
+            title: "File Name"
+        },
+       
+        // {
+        //     key: "dateModified",
+        //     title: "Date Modified"
+        // },
+        {
+            key: "size",
+            title: "Size"
+        },
+        // {
+        //     key: "status",
+        //     title: "Status"
+        // },
+        {
+            key: "actions",
+            title: "Actions"
+        }
+    ];
 
 
     const topContent = useMemo(() => {
@@ -99,6 +159,14 @@ const LocalFilesList = () => {
                         >
                             Remove
                         </Button>
+                        <Button
+                            color="primary"
+                            startContent={<Trash className="w-4 h-4" />}
+                            size="sm"
+                            onClick={loadLocalFiles}
+                        >
+                            Load Files
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -106,15 +174,13 @@ const LocalFilesList = () => {
     }, [
         filterValue,
         onSearchChange,
-        cloudFiles.length,
+        localFiles.length,
         hasSearchFilter,
     ]);
 
-
-    const renderCell = useCallback((file: FileType, columnKey: React.Key) => {
-        const cellValue = file[columnKey as keyof FileType];
+    const renderCell = useCallback((file: LocalFile, columnKey: React.Key) => {
+        const cellValue = file[columnKey as keyof LocalFile];
         // console.log("Cell Value: ", cellValue);
-
 
         if (typeof cellValue === 'function') {
             return <div>Function</div>;
@@ -128,19 +194,35 @@ const LocalFilesList = () => {
 
             case "size":
                 return (
-                    <div>{(file.size * 1024).toFixed(2)} KB</div>
+                    <div>{(file.bytes / 1024).toFixed(2)} KB</div>
+                );
+
+            case "dateModified":
+                return (
+                    <div>{file.dateModified} MB</div>
+                );
+
+            case "status":
+                return (
+                    <Chip className="capitalize" color={file.isEncrypted ? "success" : "danger"}>{file.isEncrypted ? (
+                        <span>Encrypted</span>
+                    ) : (
+                        <span>Decrypted</span>
+                    )}</Chip>
                 );
 
             case "actions":
                 return (
                     <div className="relative flex gap-2">
-                        <span className="text-lg cursor-pointer active:opacity-50" onClick={showFileContent} >
+                        <span className="text-lg cursor-pointer active:opacity-50" onClick={() => {showFileContent(file.name)}} >
                             <Eye />
+                        </span>
+                        <span className="text-lg cursor-pointer active:opacity-50" onClick={() => handleDecrypt(file.name)}>
+                            <KeyRound />
                         </span>
                         <span className="text-lg text-danger cursor-pointer active:opacity-50">
                             <Trash2 />
                         </span>
-
                     </div>
                 );
 
@@ -178,6 +260,7 @@ const LocalFilesList = () => {
 
     return (
         <>
+
             <Table
                 aria-label="Cloud files List"
                 selectionMode="multiple"
@@ -194,7 +277,7 @@ const LocalFilesList = () => {
                         <TableColumn
                             key={column.key}
                         >
-                            {column.name}
+                            {column.title}
                         </TableColumn>
                     )}
                 </TableHeader>
@@ -206,7 +289,7 @@ const LocalFilesList = () => {
                     )}
                 </TableBody>
             </Table>
-            <ModalAskPassword isOpen={isOpen} onOpen={onOpen} onOpenChange={onOpenChange}></ModalAskPassword>
+            <ModalAskPassword isOpen={isOpen} onOpen={onOpen} onOpenChange={onOpenChange} onPasswordSubmit={setPassword} selectedFilePath={selectedFilePath} ></ModalAskPassword>
         </>
 
     );

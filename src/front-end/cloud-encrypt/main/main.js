@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const serve = require("electron-serve");
 const path = require("path");
 
@@ -33,11 +33,15 @@ const createWindow = () => {
 }
 
 app.on("ready", () => {
-    createWindow();
+  createWindow();
 });
 
 app.on("window-all-closed", () => {
-    if(process.platform !== "darwin"){
-        app.quit();
-    }
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+ipcMain.on('open-file', (event, name) => {
+  shell.openPath(path.join(app.getAppPath(), "..", "downloads", name ));
 });
